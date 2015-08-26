@@ -1,7 +1,6 @@
 import queue, sys
 from collections import namedtuple
 
-
 Task = namedtuple('Task', 'id priority target_set read_set write_set')
 
 
@@ -15,8 +14,24 @@ class Scheduler:
         except AttributeError as err:
 
             self.__setattr__('_intern_queue', queue.PriorityQueue())
+            self.__setattr__('_targeted_goals', set())
 
-        [ self._intern_queue.put(((sys.maxsize-t.priority), t)) for t in tuple(task_queue) ]
+        for el in task_queue:
+
+            task = el
+            complete_target_set = set()
+
+            if not isinstance(el, Task):
+                task, complete_target_set = el
+
+            if len(complete_target_set)> 0:
+                [ self._targeted_goals.add(target_goal) for target_goal in complete_target_set ]
+
+            already_targeted = [ target for target in task.target_set if target in self._targeted_goals ]
+            if len(already_targeted)> 0:
+                continue
+
+            self._intern_queue.put(((sys.maxsize-task.priority), task))
 
     def __bool__(self):
 
@@ -32,11 +47,12 @@ class Scheduler:
 
         while(True):
             try:
-                priority, task = self._intern_queue.get(block=False)
+                priority, task = self._intern_queue.get(timeout=5)
                 return task
             except Empty as err:
                 raise StopIteration
 
     def __call__(self, task):
+
         pass
 
