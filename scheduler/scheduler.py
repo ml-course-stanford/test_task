@@ -1,4 +1,4 @@
-import logging, queue
+import queue, sys
 from collections import namedtuple
 
 
@@ -14,9 +14,9 @@ class Scheduler:
 
         except AttributeError as err:
 
-            self.__setattr__('_intern_queue', queue.Queue())
+            self.__setattr__('_intern_queue', queue.PriorityQueue())
 
-        [ self._intern_queue.put(t) for t in tuple(task_queue) ]
+        [ self._intern_queue.put(((sys.maxsize-t.priority), t)) for t in tuple(task_queue) ]
 
     def __bool__(self):
 
@@ -32,7 +32,8 @@ class Scheduler:
 
         while(True):
             try:
-                return self._intern_queue.get(block=False)
+                priority, task = self._intern_queue.get(block=False)
+                return task
             except Empty as err:
                 raise StopIteration
 
