@@ -3,7 +3,6 @@ from collections import namedtuple
 
 Task = namedtuple('Task', 'id priority target_set read_set write_set')
 
-
 class Scheduler:
 
     def extend(self, task_queue, target_set=frozenset()):
@@ -16,17 +15,9 @@ class Scheduler:
             self.__setattr__('_intern_queue', queue.PriorityQueue())
             self.__setattr__('_targeted_goals', set())
 
-        for el in task_queue:
+        [ self._targeted_goals.add(target_goal) for target_goal in target_set ]
 
-            task = el
-            complete_target_set = set()
-
-            if not isinstance(el, Task):
-                task, complete_target_set = el
-
-            if len(complete_target_set)> 0:
-                [ self._targeted_goals.add(target_goal) for target_goal in complete_target_set ]
-
+        for task in task_queue:
             already_targeted = [ target for target in task.target_set if target in self._targeted_goals ]
             if len(already_targeted)> 0:
                 continue

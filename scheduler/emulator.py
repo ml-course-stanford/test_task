@@ -8,7 +8,6 @@ EmulatorTask = namedtuple(
 
 from .scheduler import Scheduler
 
-
 class Emulator:
     def __init__(self, config, initial_task_id_queue, thread_count):
         assert thread_count > 0
@@ -19,9 +18,7 @@ class Emulator:
         self._queue = deque()
 
         self._time = 0
-
-        self._scheduler.extend([(self._config[initial_task_id].task, self._config[initial_task_id].complete_target_set) \
-                                for initial_task_id in initial_task_id_queue])
+        self._scheduler.extend([self._config[initial_task_id].task for initial_task_id in initial_task_id_queue])
         self._print('initial')
 
     def loop(self):
@@ -36,19 +33,18 @@ class Emulator:
         while len(self._queue) < self._thread_count:
             if not self._scheduler:
                 break
-
             self._add_unit()
 
     def _add_unit(self):
-        task = next(self._scheduler)
+        task = next(self._scheduler) # get_task
 
-        self._print('started task'.upper(), task.id)
+        self._print('started task'.upper(), task.id) # run_task
+
 
         end_time = self._time + self._config[task.id].duration
+        unit = end_time, task # task result
 
-        unit = end_time, task
-
-        self._queue.append(unit)
+        self._queue.append(unit) # TaskMaker queue
 
     def _process_next_unit(self):
 
@@ -70,7 +66,6 @@ class Emulator:
 
     def _get_next_unit(self):
         result = min(self._queue, key=lambda unit: unit[0])
-
         self._queue.remove(result)
 
         return result

@@ -14,5 +14,5 @@ config:
         target_set: [goal_b]
         complete_target_set: [goal_a]
        
-
+thread_count: 2
 initial_task_id_queue: [2,3]
